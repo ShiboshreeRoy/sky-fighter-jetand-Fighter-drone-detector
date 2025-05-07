@@ -1,0 +1,5 @@
+ultralytics==8.0.151
+opencv-python
+numpy
+Pillow
+filterpy 
