@@ -132,7 +132,12 @@ class SkyFeatureDetector:
             return np.array([])
 
     def classify_target(self, cls):
-        """Classify target based on YOLO class ID."""
+
+############################################################################################################
+#               Classify target based on YOLO class ID.
+############################################################################################################
+
+
         if cls == 4:
             return "Jet"
         elif cls == 14:
@@ -140,10 +145,14 @@ class SkyFeatureDetector:
         return "Unknown"
 
     def process_frame(self, frame):
-        """Process a frame: detect, track, classify, and simulate firing."""
+  
+############################################################################################################
+#             Process a frame: detect, track, classify, and simulate firing.  
+############################################################################################################
+
         try:
-            # Detect objects
-            detections = self.detect_objects(frame)
+            
+            detections = self.detect_objects(frame) # [Detect objects]
             if len(detections) == 0:
                 self.locked_target = None  # Reset lock if no targets
                 return frame, []  # No firing, no targets
