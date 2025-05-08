@@ -120,4 +120,4 @@ Make sure `sort/sort.py` is accessible to your main script.
 
 ### 📜 License
 
-MIT License – use freely and modify responsibly.
+[LICENSE](MIT License)
