@@ -1,5 +1,5 @@
 
-## 🛰️ Advanced Sky Fighter Jet and Drone Detector
+### 🎯 Drone/Jets Real-Time Detection System
 
 A real-time object detection and tracking system that identifies jets and drones in the sky using YOLOv8, the SORT tracking algorithm, and an interactive Tkinter GUI with radar visualization. The system simulates target locking and firing, complete with sound alerts and screenshots of engagements.
 
@@ -117,7 +117,6 @@ Make sure `sort/sort.py` is accessible to your main script.
 * [ ] Add support for recording video
 
 ---
+## 📜 License
 
-### 📜 License
-
-[LICENSE](MIT License)
+This project is licensed under the [MIT License](LICENSE).
