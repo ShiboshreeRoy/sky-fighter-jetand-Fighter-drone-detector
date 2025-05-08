@@ -1,3 +1,19 @@
+############################################################################################################################################################
+#                   Advanced Sky Fighter Jet and Drone Detector with Enhanced Features  
+#                   This script implements a real-time detection and tracking system for fighter jets and drones using YOLOv8.    
+#                   It includes a radar-like display, target locking, and firing simulation with sound alerts.
+#                   The system is designed to be user-friendly and efficient, providing a comprehensive solution for aerial surveillance.
+#                   Author: Shiboshree Roy
+#                   Date: 2025-05-07
+#                   License: MIT
+############################################################################################################################################################
+
+
+
+##########################################################################################################################################################
+#                    Import necessary libraries
+##########################################################################################################################################################
+
 import cv2
 import numpy as np
 import os
@@ -8,7 +24,12 @@ from ultralytics import YOLO
 from sort.sort import Sort  # SORT tracker
 import winsound  # For alert sound (Windows-specific)
 
+###########################################################################################################################
+# Suppress warnings from OpenCV
 # Setup logging
+###########################################################################################################################
+
+
 logging.basicConfig(
     level=logging.INFO,
     format='[%(levelname)s] %(asctime)s - %(message)s',
@@ -20,21 +41,37 @@ class SkyFeatureDetector:
         """Initialize the detector with camera, YOLO model, and tracker."""
         self.output_dir = output_dir
         os.makedirs(output_dir, exist_ok=True)
+#################################################################################################################
+#                    Initialize camera
+#################################################################################################################
 
-        # Initialize camera
+
         self.cap = cv2.VideoCapture(0)
         if not self.cap.isOpened():
             raise ValueError("Failed to open camera.")
         logging.info("Camera initialized.")
+##################################################################################################################
+#               Load YOLO model (assumes yolov8n.pt is downloaded)
+##################################################################################################################
 
-        # Load YOLO model (assumes yolov8n.pt is downloaded)
-        self.model = YOLO('yolov8n.pt')  # Replace with custom model if trained
+
+        self.model = YOLO('yolov8n.pt')  # [if you wanna change  your  won custom  model  you can  eassily  Replace with custom model if trained]
+
         logging.info("YOLOv8 model loaded.")
 
-        # Initialize SORT tracker
+###################################################################################################################
+#           Initialize SORT tracker
+###################################################################################################################
+
+
         self.tracker = Sort(max_age=10, min_hits=3, iou_threshold=0.3)
         self.targets = []
-        self.locked_target = None  # For target locking
+
+####################################################################################################################
+#        For target locking
+####################################################################################################################
+
+        self.locked_target = None 
 
     def read_frame(self):
         """Read a frame from the camera."""
@@ -59,10 +96,17 @@ class SkyFeatureDetector:
                     x1, y1, x2, y2 = map(int, box.xyxy[0])
                     conf = float(box.conf[0])
                     cls = int(box.cls[0])
-                    # Map COCO classes: 4 - airplane (Jet), 14 - bird (Drone proxy)
-                    if cls == 4:  # Airplane -> Jet
+######################################################################################################################
+#                        Map COCO classes: 4 - airplane (Jet), 14 - bird (Drone proxy)
+######################################################################################################################
+
+
+                    if cls == 4:  #   [Airplane -> Jet] 
                         detections.append([x1, y1, x2, y2, conf, cls])
-                    elif cls == 14:  # Bird -> Drone
+
+                    elif cls == 14:  #  [Bird -> Drone]
+
+
                         detections.append([x1, y1, x2, y2, conf, cls])
             return np.array(detections)
         except Exception as e:
@@ -70,7 +114,13 @@ class SkyFeatureDetector:
             return np.array([])
 
     def track_objects(self, detections):
-        """Track detected objects across frames."""
+
+
+###########################################################################################################
+#                           Track detected objects across frames. 
+###########################################################################################################
+
+
         try:
             if len(detections) > 0:
                 self.targets = self.tracker.update(detections[:, :5])
