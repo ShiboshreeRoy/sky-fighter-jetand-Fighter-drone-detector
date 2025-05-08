@@ -154,19 +154,31 @@ class SkyFeatureDetector:
             
             detections = self.detect_objects(frame) # [Detect objects]
             if len(detections) == 0:
-                self.locked_target = None  # Reset lock if no targets
-                return frame, []  # No firing, no targets
+                self.locked_target = None  # [Reset lock if no targets]
+                return frame, []  # [No firing, no targets]
 
-            # Track objects
+#############################################################################################################
+#                                   Track objects
+#############################################################################################################
+
             tracked_objects = self.track_objects(detections)
             overlay = frame.copy()
             targets = []
 
-            # Associate detections with tracks (simplified)
+
+#############################################################################################################
+#                                   Associate detections with tracks (simplified)
+#############################################################################################################
+
             for track in tracked_objects:
                 x1, y1, x2, y2, track_id = map(int, track)
                 center = (int((x1 + x2) / 2), int((y1 + y2) / 2))
-                # Find corresponding detection class
+
+#############################################################################################################
+#                               Find corresponding detection class
+#############################################################################################################
+
+
                 cls = None
                 for det in detections:
                     det_x1, det_y1, det_x2, det_y2, _, det_cls = det
@@ -174,26 +186,42 @@ class SkyFeatureDetector:
                         cls = int(det_cls)
                         break
                 if cls is None:
-                    continue  # Skip if no matching detection
+                    continue  # [Skip if no matching detection]
                 target_type = self.classify_target(cls)
                 targets.append((center, target_type, track_id))
 
-                # Draw bounding box and label
+#############################################################################################################
+#                   Draw bounding box and label
+#############################################################################################################
+
                 color = (0, 255, 0) if track_id != self.locked_target else (255, 0, 0)
                 cv2.rectangle(overlay, (x1, y1), (x2, y2), color, 2)
                 label = f"{target_type} ID:{track_id}{' (Locked)' if track_id == self.locked_target else ''}"
                 cv2.putText(overlay, label, (x1, y1 - 10), 
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
-                # Target locking: Lock onto first detected target
+#############################################################################################################
+#               Target locking: Lock onto first detected target
+#############################################################################################################
+
+
                 if self.locked_target is None and targets:
                     self.locked_target = track_id
                     logging.info(f"Locked onto {target_type} ID:{track_id}")
+#############################################################################################################
+#                   Simulate firing only at locked target
+#############################################################################################################
 
-                # Simulate firing only at locked target
+
                 if track_id == self.locked_target:
                     fire_origin = (frame.shape[1] // 2, frame.shape[0])
-                    # Enhanced firing simulation: Laser effect
+
+
+#############################################################################################################
+#                   Enhanced firing simulation: Laser effect
+#############################################################################################################
+
+
                     for i in range(5):
                         alpha = i / 5
                         pos = (int(fire_origin[0] * (1 - alpha) + center[0] * alpha),
@@ -201,12 +229,22 @@ class SkyFeatureDetector:
                         cv2.circle(overlay, pos, 5 - i, (0, 0, 255), -1)
                     cv2.line(overlay, fire_origin, center, (0, 0, 255), 2)
                     logging.info(f"Fired at {target_type} ID:{track_id} at {center}")
-                    # Save screenshot
+
+
+#############################################################################################################
+#                   Save screenshot
+#############################################################################################################
+
+
                     cv2.imwrite(os.path.join(self.output_dir, f"target_{track_id}_{int(cv2.getTickCount())}.jpg"), overlay)
 
-            # Alert if new targets are detected
+#############################################################################################################
+#               Alert if new targets are detected
+#############################################################################################################
+
+
             if len(targets) > 0:
-                winsound.Beep(1000, 200)  # Alert sound
+                winsound.Beep(1000, 200)  # [Alert sound]
 
             return overlay, targets
         except Exception as e:
@@ -223,32 +261,51 @@ class SkyFeatureDetector:
 
 class App:
     def __init__(self, window, window_title, detector):
-        """Initialize the Tkinter GUI."""
+#############################################################################################################
+#                   Initialize the Tkinter GUI.
+#############################################################################################################
+
+
         self.window = window
         self.window.title(window_title)
         self.detector = detector
         self.frame_width = 640
         self.frame_height = 480
 
-        # Layout frames
+##############################################################################################################
+#                    Layout frames
+##############################################################################################################
+
+
         self.video_frame = tk.Frame(window)
         self.video_frame.pack(side=tk.LEFT, padx=5, pady=5)
 
         self.radar_frame = tk.Frame(window)
         self.radar_frame.pack(side=tk.RIGHT, padx=5, pady=5)
+#############################################################################################################
+#               Video canvas
+#############################################################################################################
 
-        # Video canvas
+
         self.video_canvas = tk.Canvas(self.video_frame, width=640, height=480)
         self.video_canvas.pack()
 
-        # Radar canvas
+
+#############################################################################################################
+#               Radar canvas
+#############################################################################################################
         self.radar_canvas = tk.Canvas(self.radar_frame, width=200, height=200, bg='black')
         self.radar_canvas.pack()
         self.radar_canvas.create_oval(20, 20, 180, 180, outline='green')
         self.radar_canvas.create_line(100, 20, 100, 180, fill='green')
         self.radar_canvas.create_line(20, 100, 180, 100, fill='green')
 
-        # Status label
+
+#############################################################################################################
+#       Status label
+#############################################################################################################
+
+
         self.status_label = tk.Label(self.radar_frame, text="Jets: 0, Drones: 0")
         self.status_label.pack(pady=5)
 
