@@ -309,32 +309,52 @@ class App:
         self.status_label = tk.Label(self.radar_frame, text="Jets: 0, Drones: 0")
         self.status_label.pack(pady=5)
 
-        # Quit button
+#############################################################################################################
+#          Quit button
+#############################################################################################################
+
+
         self.btn_quit = tk.Button(window, text="Quit", command=self.quit)
         self.btn_quit.pack(side=tk.BOTTOM, pady=5)
 
-        self.delay = 10  # Update every 10ms
+        self.delay = 10  # [Update every 10ms]
         self.update()
         self.window.mainloop()
 
     def update(self):
-        """Update GUI with processed frame and radar."""
+
+#############################################################################################################
+#               Update GUI with processed frame and radar.
+#############################################################################################################
+
+
         frame = self.detector.read_frame()
         if frame is not None:
-            # Set frame dimensions
+
+##############################################################################################################
+#                       Set frame dimensions
+##############################################################################################################
+
             if self.frame_width == 640 and self.frame_height == 480:
                 self.frame_width = frame.shape[1]
                 self.frame_height = frame.shape[0]
                 self.video_canvas.config(width=self.frame_width, height=self.frame_height)
 
-            # Process frame
+##############################################################################################################
+#                       Process frame
+##############################################################################################################
+
             processed_frame, targets = self.detector.process_frame(frame)
             img = cv2.cvtColor(processed_frame, cv2.COLOR_BGR2RGB)
             img = Image.fromarray(img)
             self.photo = ImageTk.PhotoImage(image=img)
             self.video_canvas.create_image(0, 0, image=self.photo, anchor=tk.NW)
 
-            # Update radar
+###############################################################################################################
+#               Update radar
+###############################################################################################################
+
+
             self.radar_canvas.delete('targets')
             radar_center_x, radar_center_y = 100, 100
             r = 80
@@ -348,7 +368,10 @@ class App:
                 self.radar_canvas.create_oval(radar_x-3, radar_y-3, radar_x+3, radar_y+3, 
                                               fill=color, tags='targets')
 
-            # Update status
+################################################################################################################
+#               Update status
+################################################################################################################
+
             jets = sum(1 for _, t, _ in targets if t == "Jet")
             drones = sum(1 for _, t, _ in targets if t == "Drone")
             self.status_label.config(text=f"Jets: {jets}, Drones: {drones}")
@@ -356,7 +379,11 @@ class App:
         self.window.after(self.delay, self.update)
 
     def quit(self):
-        """Clean up and exit."""
+
+################################################################################################################
+#                           Clean up and exit.
+################################################################################################################
+
         try:
             self.detector.release()
             self.window.quit()
@@ -365,7 +392,10 @@ class App:
             logging.error(f"Error during quit: {e}")
 
 def main():
-    """Start the application."""
+
+################################################################################################################
+#                       Start the application.
+################################################################################################################
     try:
         detector = SkyFeatureDetector()
         App(tk.Tk(), "Advanced Sky Fighter Jet and Drone Detector", detector)
